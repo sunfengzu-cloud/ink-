@@ -2,6 +2,8 @@
 
 视频 / PDF / 文章 → 结构化知识卡片 → Obsidian 知识库 + 分享网站
 
+完整方法论手册：[methodology/README.md](methodology/README.md)
+
 ## 安装
 
 ```bash

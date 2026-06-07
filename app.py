@@ -88,8 +88,45 @@ from config import DEFAULT_OUTPUT
 OUTPUT_DIR = Path(DEFAULT_OUTPUT)
 OUTPUT_DIR.mkdir(exist_ok=True)
 
+PROJECT_DIR = Path(__file__).parent
+
 app.mount("/site", StaticFiles(directory=str(OUTPUT_DIR), html=True), name="site")
 app.mount("/output", StaticFiles(directory=str(OUTPUT_DIR), html=True), name="output")
+
+
+@app.get("/methodology")
+def get_methodology():
+    path = PROJECT_DIR / "methodology" / "README.md"
+    content = path.read_text(encoding="utf-8")
+    import markdown
+    html = markdown.markdown(content, extensions=["fenced_code", "tables"])
+    page = f"""<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><title>笔记方法论 — ink</title>
+<style>
+body{{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0f;color:#c4c4cf;max-width:800px;margin:0 auto;padding:40px 24px;line-height:1.8}}
+h1{{color:#ffd700;font-size:2rem;border-bottom:1px solid #2a2a3a;padding-bottom:8px}}
+h2{{color:#ffd700;font-size:1.3rem;margin-top:32px}}
+h3{{color:#e0e0e8;font-size:1.1rem;margin-top:24px}}
+table{{border-collapse:collapse;width:100%;margin:16px 0}}
+th,td{{border:1px solid #2a2a3a;padding:8px 12px;text-align:left;font-size:.9rem}}
+th{{background:#1a1a26;color:#ffd700}}
+code{{background:#1a1a26;padding:2px 6px;border-radius:4px;font-size:.85rem}}
+blockquote{{border-left:3px solid #ffd700;padding:8px 16px;margin:16px 0;background:#12121a}}
+strong{{color:#ffd700}}
+a{{color:#ffd700}}
+.back{{margin-bottom:24px;display:inline-block;color:#888;text-decoration:none}}
+.back:hover{{color:#ffd700}}
+hr{{border:none;border-top:1px solid #2a2a3a;margin:24px 0}}
+</style>
+</head>
+<body><a href="/" class="back">&larr; 返回</a>
+{html}
+</body></html>"""
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse(page)
+
+
 app.mount("/", StaticFiles(directory=str(STATIC_DIR), html=True), name="static")
 
 

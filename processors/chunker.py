@@ -9,11 +9,9 @@ class Chunker:
         self.model = model or "glm-4-flash"
 
     def chunk(self, segments, source_title, use_llm=True):
-        if not use_llm or not self.api_key:
-            return self._simple_chunk(segments, source_title)
-        return self._llm_chunk(segments, source_title)
+        return self._topic_chunk(segments, source_title)
 
-    def _simple_chunk(self, segments, source_title):
+    def _topic_chunk(self, segments, source_title, min_segments=5):
         concepts = []
         current = {"title": source_title, "start": "", "end": "", "texts": []}
 
@@ -21,8 +19,11 @@ class Chunker:
             if not current["start"]:
                 current["start"] = seg["start"]
             current["texts"].append(seg["text"])
-            text = seg["text"]
-            if text.rstrip().endswith((".", "!", "?", "。", "！", "？")):
+            text = seg["text"].strip()
+            is_end = text[-1] in (".", "!", "?", "。", "！", "？") if text else False
+            enough = len(current["texts"]) >= min_segments
+
+            if is_end and (enough or len(current["texts"]) >= min_segments * 2):
                 current["end"] = seg["end"]
                 current["full_text"] = " ".join(current["texts"])
                 current["segment_count"] = len(current["texts"])

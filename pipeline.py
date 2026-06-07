@@ -46,40 +46,26 @@ class Pipeline:
 
         chunker = Chunker(self.api_key, self.api_base, self.model)
         concepts = chunker.chunk(segments, title, use_llm=use_llm)
-        print(f"[ink] Chunked into {len(concepts)} concept(s)")
+        print(f"[ink] Chunked into {len(concepts)} section(s)")
 
         gen = CardGenerator(self.api_key, self.api_base, self.model)
-        cards = gen.generate(concepts, raw)
-        print(f"[ink] Generated {len(cards)} card(s)")
-
-        linker = Linker(self.api_key, self.api_base, self.model)
-        for card in cards:
-            links = linker.link(card, self.active_cards)
-            if links:
-                existing_links = card.get("links", [])
-                existing_titles = {l if isinstance(l, str) else l.get("title", l) for l in existing_links}
-                for link in links:
-                    link_title = link if isinstance(link, str) else link.get("title", "")
-                    if link_title and link_title not in existing_titles:
-                        existing_links.append(link)
-                card["links"] = existing_links
-            self.active_cards.append(card)
-        print(f"[ink] Linked cards")
+        sections = gen.generate(concepts, raw)
+        print(f"[ink] Generated {len(sections)} section(s)")
 
         writer = ObsidianWriter(self.output_dir)
-        vault_path = writer.write(cards, raw, screenshots)
+        vault_path = writer.write(sections, raw, screenshots)
         print(f"[ink] Written to: {vault_path}")
 
         review = ReviewGenerator(self.api_key, self.api_base, self.model)
-        review_cards = review.generate(cards, use_llm=use_llm)
+        review_cards = review.generate_from_sections(sections, use_llm=use_llm)
         print(f"[ink] Generated {len(review_cards)} review questions")
 
         exporter = SiteExporter(self.output_dir)
-        site_path = exporter.export(cards, vault_path, review_cards)
+        site_path = exporter.export(sections, vault_path, review_cards)
         site_rel = Path(vault_path).name + "/_site/index.html"
         print(f"[ink] Site exported to: {site_path}")
 
-        return {"title": title, "status": "done", "cards": len(cards),
+        return {"title": title, "status": "done", "cards": len(sections),
                 "path": vault_path, "site": site_rel, "reviews": len(review_cards)}
 
     def _detect_type(self, source_path):

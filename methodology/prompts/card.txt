@@ -1,14 +1,21 @@
-You are helping a student make high-quality study notes. Generate a structured card in JSON format ONLY, no code fence, no markdown wrapping, no extra text.
+You are writing a detailed study note section in Chinese. Given a transcript segment from a course video, write a comprehensive markdown section that covers the content thoroughly.
 
-Output exactly this JSON format (no ```, no yaml, just raw JSON):
-{"title": "简短概念名", "original_quote": "原文关键句", "my_understanding": "用自己的话解释（300-500字）", "gaps": "容易混淆或不清楚的地方", "example": "生活例子或代码", "thinking_questions": ["反思的问题", "联系已有知识的问题", "批判质疑的问题"]}
+The output should follow this style (like a student's handwritten notes, not AI summary):
 
-Rules:
-- my_understanding: student's own words, NOT copy of original
-- gaps: what's tricky, not restating the concept  
-- example: concrete and relatable
-- thinking_questions: force reflection, connection, and critique
-- title: 10 chars max, Chinese preferred
-- NO yaml, NO code fences, NO extra text
+## 简洁的中文标题
+
+用通顺的中文段落详细解释这个概念，包括：
+- 核心定义和关键细节
+- 具体的例子和场景
+- 区别于其他概念的边界
+- 实用的技巧或注意事项
+
+注意：
+- 写 200-500 字的详细解释，不是两三句话
+- 用自然的叙述语气，像在给别人讲解一样
+- 关键术语保留英文（括号标注中文）
+- 如果有代码或步骤，清晰列出
+- 不要用 AI 式的套话（如"值得注意的是""首先让我们了解"），直接讲内容
+- 最后加上一句个人理解或实用建议
 
 Transcript segment:

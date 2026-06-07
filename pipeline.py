@@ -1,7 +1,9 @@
 from pathlib import Path
 from ingestors import get_ingestor
 from processors import Chunker, CardGenerator, Linker
+from processors.review import ReviewGenerator
 from output import ObsidianWriter
+from output.site import SiteExporter
 from config import METHODOLOGY, DEFAULT_OUTPUT
 
 class Pipeline:
@@ -65,7 +67,17 @@ class Pipeline:
         vault_path = writer.write(cards, raw, screenshots)
         print(f"[ink] Written to: {vault_path}")
 
-        return {"title": title, "status": "done", "cards": len(cards), "path": vault_path}
+        review = ReviewGenerator(self.api_key, self.api_base, self.model)
+        review_cards = review.generate(cards, use_llm=use_llm)
+        print(f"[ink] Generated {len(review_cards)} review questions")
+
+        exporter = SiteExporter(self.output_dir)
+        site_path = exporter.export(cards, vault_path, review_cards)
+        site_rel = Path(vault_path).name + "/_site/index.html"
+        print(f"[ink] Site exported to: {site_path}")
+
+        return {"title": title, "status": "done", "cards": len(cards),
+                "path": vault_path, "site": site_rel, "reviews": len(review_cards)}
 
     def _detect_type(self, source_path):
         if source_path.is_dir():

@@ -84,6 +84,12 @@ def get_job(job_id: str):
     }
 
 
+from config import DEFAULT_OUTPUT
+OUTPUT_DIR = Path(DEFAULT_OUTPUT)
+OUTPUT_DIR.mkdir(exist_ok=True)
+
+app.mount("/site", StaticFiles(directory=str(OUTPUT_DIR), html=True), name="site")
+app.mount("/output", StaticFiles(directory=str(OUTPUT_DIR), html=True), name="output")
 app.mount("/", StaticFiles(directory=str(STATIC_DIR), html=True), name="static")
 
 

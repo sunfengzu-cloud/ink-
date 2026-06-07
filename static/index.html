@@ -244,9 +244,12 @@ function pollJob(jobId) {
         const results = data.results || [];
         const resultDiv = document.createElement('div');
         resultDiv.className = 'job-result';
-        resultDiv.innerHTML = results.map(r =>
-          `${r.status === 'done' ? '✅' : '⚠️'} ${r.title}: ${r.cards || '0'} 张卡片 → <code>${r.path || ''}</code>`
-        ).join('<br>');
+        resultDiv.innerHTML = results.map(r => {
+          let line = `${r.status === 'done' ? '✅' : '⚠️'} ${r.title}: ${r.cards || '0'} 张卡片`;
+          if (r.reviews) line += `, ${r.reviews} 道复习题`;
+          if (r.site) line += ` — <a href="/site/${r.title}/index.html" target="_blank" style="color:#ffd700">🌐 分享网站</a>`;
+          return line;
+        }).join('<br>');
         document.getElementById(`job-${jobId}`).appendChild(resultDiv);
         document.getElementById('processBtn').disabled = false;
         document.getElementById('processBtn').textContent = '⚡ 开始处理';

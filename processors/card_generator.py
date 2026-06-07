@@ -57,13 +57,14 @@ class CardGenerator:
                 card = parsed
                 card.setdefault("title", concept.get("title", "Untitled"))
                 card.setdefault("original_quote", concept.get("text", "")[:200])
-                card.setdefault("my_understanding", "")
-                card.setdefault("gaps", "")
-                card.setdefault("links", [])
-                card.setdefault("example", "")
-                card["source"] = source_info.get("source", "")
-                card["created"] = datetime.now().strftime("%Y-%m-%d")
-                return card
+            card.setdefault("my_understanding", "")
+            card.setdefault("gaps", "")
+            card.setdefault("links", [])
+            card.setdefault("example", "")
+            card.setdefault("thinking_questions", [])
+            card["source"] = source_info.get("source", "")
+            card["created"] = datetime.now().strftime("%Y-%m-%d")
+            return card
         except:
             pass
 
@@ -76,6 +77,7 @@ class CardGenerator:
             "gaps": "",
             "links": [],
             "example": "",
+            "thinking_questions": [],
             "created": datetime.now().strftime("%Y-%m-%d")
         }
 
@@ -90,5 +92,6 @@ class CardGenerator:
             "gaps": "_What's still unclear?_",
             "links": [],
             "example": "_Add a concrete example_",
+            "thinking_questions": ["_Reflect: why does this matter?_"],
             "created": datetime.now().strftime("%Y-%m-%d")
         }

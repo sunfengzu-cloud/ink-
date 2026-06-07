@@ -42,7 +42,13 @@ def main():
     sys.stdout.reconfigure(encoding="utf-8")
     for r in results:
         status = "[OK]" if r["status"] == "done" else "[!]"
-        print(f"{status} {r.get('title')}: {r.get('status')} ({r.get('cards', 0)} cards)")
+        details = f"({r.get('cards', 0)} cards"
+        if r.get("reviews"):
+            details += f", {r['reviews']} review Qs"
+        details += ")"
+        print(f"{status} {r.get('title')}: {r.get('status')} {details}")
+        if r.get("site"):
+            print(f"     Site: {r['site']}")
 
 if __name__ == "__main__":
     main()

@@ -50,13 +50,11 @@ class CardGenerator:
         return resp.json()["choices"][0]["message"]["content"]
 
     def _parse_card_response(self, response, concept, source_info):
-        try:
-            import yaml
-            parsed = yaml.safe_load(response)
-            if isinstance(parsed, dict):
-                card = parsed
-                card.setdefault("title", concept.get("title", "Untitled"))
-                card.setdefault("original_quote", concept.get("text", "")[:200])
+        parsed = self._try_parse_json(response) or self._try_parse_yaml(response)
+        if parsed and isinstance(parsed, dict):
+            card = parsed
+            card.setdefault("title", concept.get("title", "Untitled"))
+            card.setdefault("original_quote", concept.get("text", "")[:200] if isinstance(concept.get("text"), str) else " ".join(concept.get("texts", []))[:200])
             card.setdefault("my_understanding", "")
             card.setdefault("gaps", "")
             card.setdefault("links", [])
@@ -65,8 +63,6 @@ class CardGenerator:
             card["source"] = source_info.get("source", "")
             card["created"] = datetime.now().strftime("%Y-%m-%d")
             return card
-        except:
-            pass
 
         return {
             "title": concept.get("title", "Untitled"),
@@ -80,6 +76,35 @@ class CardGenerator:
             "thinking_questions": [],
             "created": datetime.now().strftime("%Y-%m-%d")
         }
+
+    def _try_parse_json(self, text):
+        import re, json
+        # Strip code fences
+        text = re.sub(r"^```(?:json)?\n?|```$", "", text.strip(), flags=re.MULTILINE)
+        # Try direct parse
+        try:
+            return json.loads(text)
+        except:
+            pass
+        # Try find first { ... } block
+        m = re.search(r"\{.*\}", text, re.DOTALL)
+        if m:
+            try:
+                return json.loads(m.group())
+            except:
+                pass
+        return None
+
+    def _try_parse_yaml(self, text):
+        import re, yaml
+        text = re.sub(r"^```(?:yaml)?\n?|```$", "", text.strip(), flags=re.MULTILINE)
+        try:
+            parsed = yaml.safe_load(text)
+            if isinstance(parsed, dict):
+                return parsed
+        except:
+            pass
+        return None
 
     def _template_card(self, concept, source_info):
         return {

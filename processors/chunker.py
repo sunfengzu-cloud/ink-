@@ -73,13 +73,9 @@ class Chunker:
         return resp.json()["choices"][0]["message"]["content"]
 
     def _parse_chunk_response(self, response, segments):
-        try:
-            import yaml
-            parsed = yaml.safe_load(response)
-            if isinstance(parsed, list):
-                return parsed
-        except:
-            pass
+        parsed = self._try_parse_json(response) or self._try_parse_yaml(response)
+        if isinstance(parsed, list):
+            return parsed
 
         concepts = []
         blocks = re.split(r"\n(?=\d+\.\s|\-\s)", response.strip())
@@ -91,3 +87,29 @@ class Chunker:
                 "text": block.strip()
             })
         return concepts if concepts else [{"title": source_title, "text": " ".join(s["text"] for s in segments)}]
+
+    def _try_parse_json(self, text):
+        import re, json
+        text = re.sub(r"^```(?:json)?\n?|```$", "", text.strip(), flags=re.MULTILINE)
+        try:
+            return json.loads(text)
+        except:
+            pass
+        m = re.search(r"\[.*\]", text, re.DOTALL)
+        if m:
+            try:
+                return json.loads(m.group())
+            except:
+                pass
+        return None
+
+    def _try_parse_yaml(self, text):
+        import re, yaml
+        text = re.sub(r"^```(?:yaml)?\n?|```$", "", text.strip(), flags=re.MULTILINE)
+        try:
+            parsed = yaml.safe_load(text)
+            if isinstance(parsed, list):
+                return parsed
+        except:
+            pass
+        return None

@@ -7,10 +7,7 @@ Rules:
 - Include the exact original text for each segment
 - NEVER merge two unrelated concepts into one segment
 
-Output format (YAML list):
-- title: "概念名称"
-  start: "MM:SS"
-  end: "MM:SS"
-  text: "原文段落"
+Output format (raw JSON array ONLY, no code fence):
+[{"title": "概念名称", "start": "MM:SS", "end": "MM:SS", "text": "原文段落"}]
 
 Transcript:

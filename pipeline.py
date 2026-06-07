@@ -22,7 +22,10 @@ class Pipeline:
 
         ingestor = get_ingestor(source_type)
         print(f"[ink] Ingesting: {source_path}")
-        raw = ingestor.ingest(source_path)
+        if source_type == "video" and subtitle_path:
+            raw = ingestor.ingest(source_path, subtitle_path)
+        else:
+            raw = ingestor.ingest(source_path)
 
         if source_type == "folder":
             results = []

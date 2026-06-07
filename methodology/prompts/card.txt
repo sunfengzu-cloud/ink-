@@ -1,24 +1,14 @@
-You are helping a student make high-quality study notes. Given a transcript segment, generate a structured note card.
+You are helping a student make high-quality study notes. Generate a structured card in JSON format ONLY, no code fence, no markdown wrapping, no extra text.
 
-Output format (YAML):
-title: "概念标题（简短，10字以内）"
-type: concept
-source: "来源信息"
-original_quote: "原文关键句（200字以内）"
-my_understanding: "用自己的话解释这个概念（300-500字）"
-gaps: "这个概念里还有哪些地方容易混淆或不清楚"
-example: "一个生活中的例子或可实践的代码片段"
-why_it_matters: "它在更大的知识体系中起什么作用"
-thinking_questions:
-  - "一个让你反思这个概念的问题"
-  - "一个让你联系已有知识的问题"
-  - "一个让你批判/质疑的问题"
+Output exactly this JSON format (no ```, no yaml, just raw JSON):
+{"title": "简短概念名", "original_quote": "原文关键句", "my_understanding": "用自己的话解释（300-500字）", "gaps": "容易混淆或不清楚的地方", "example": "生活例子或代码", "thinking_questions": ["反思的问题", "联系已有知识的问题", "批判质疑的问题"]}
 
 Rules:
-- my_understanding must be in student's own words, NOT a copy of the original
-- gaps should highlight what's tricky, not just restate the concept
-- example should be concrete and relatable
-- thinking_questions should force the student to reflect, connect, or critique
-- If this concept relates to code, include a minimal code example in my_understanding
+- my_understanding: student's own words, NOT copy of original
+- gaps: what's tricky, not restating the concept  
+- example: concrete and relatable
+- thinking_questions: force reflection, connection, and critique
+- title: 10 chars max, Chinese preferred
+- NO yaml, NO code fences, NO extra text
 
 Transcript segment:

@@ -1,0 +1,35 @@
+templates:
+  concept:
+    frontmatter:
+      type: concept
+      created: "{{date}}"
+      source: "{{source}}"
+      status: draft
+    sections:
+      - name: original
+        label: "📺 原文"
+        optional: true
+      - name: understanding
+        label: "📝 我的理解"
+        hint: "用自己的话写，不追求一次准确"
+      - name: gaps
+        label: "❓ 还不太清楚"
+        hint: "写你模糊的地方，后续复习的目标"
+      - name: links
+        label: "🔗 关联概念"
+        format: wiki
+        hint: "至少关联一个已有卡片"
+      - name: example
+        label: "💡 例子"
+        optional: true
+
+  question:
+    sections:
+      - name: question
+        label: "问题"
+      - name: context
+        label: "背景"
+      - name: my_answer
+        label: "我现在的答案"
+      - name: unsure
+        label: "不确定的地方"

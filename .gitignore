@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+temp/
+output/
+learn-notes/
+*.mp4
+*.pdf

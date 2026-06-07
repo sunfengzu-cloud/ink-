@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ink — 知识笔记</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter','Segoe UI',sans-serif;background:#0a0a0f;color:#c4c4cf;min-height:100vh;line-height:1.6}
+.container{max-width:900px;margin:0 auto;padding:40px 24px}
+header{margin-bottom:48px}
+h1{font-size:2.5rem;font-weight:700;background:linear-gradient(135deg,#ffd700,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-1px}
+h1 span{font-weight:300}
+.subtitle{color:#666;font-size:0.9rem;margin-top:4px}
+.tagline{color:#888;font-size:1rem;margin-top:8px}
+.card{background:#12121a;border:1px solid #1e1e2a;border-radius:12px;padding:24px;margin-bottom:20px}
+.card h2{font-size:1.2rem;color:#ffd700;margin-bottom:16px;font-weight:600}
+.drop-zone{border:2px dashed #2a2a3a;border-radius:12px;padding:48px 24px;text-align:center;cursor:pointer;transition:all .3s;background:#0e0e16}
+.drop-zone:hover,.drop-zone.drag-over{border-color:#ffd700;background:#1a1a26}
+.drop-zone-icon{font-size:2.5rem;margin-bottom:12px}
+.drop-zone-text{color:#888;font-size:0.95rem}
+.drop-zone-hint{color:#555;font-size:0.8rem;margin-top:8px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:0.85rem;color:#888;margin-bottom:6px}
+.form-group input[type="text"],.form-group select{width:100%;padding:10px 14px;background:#0e0e16;border:1px solid #2a2a3a;border-radius:8px;color:#c4c4cf;font-size:0.9rem}
+.form-group input[type="text"]:focus,.form-group select:focus{outline:none;border-color:#ffd700}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 24px;border:none;border-radius:8px;font-size:0.95rem;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-primary{background:linear-gradient(135deg,#ffd700,#ff8c00);color:#0a0a0f}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(255,215,0,.3)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-secondary{background:#1e1e2a;color:#c4c4cf}
+.btn-secondary:hover{background:#2a2a3a}
+.progress-bar{height:4px;background:#1e1e2a;border-radius:2px;overflow:hidden;margin:12px 0}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,#ffd700,#ff8c00);width:0;transition:width .5s}
+.job-item{padding:12px 0;border-bottom:1px solid #1a1a26}
+.job-item:last-child{border-bottom:none}
+.job-title{font-weight:600;color:#e0e0e8}
+.job-status{font-size:0.85rem;margin-top:4px}
+.job-status.running{color:#ffd700}
+.job-status.done{color:#4ade80}
+.job-status.error{color:#f87171}
+.job-result{margin-top:8px;padding:8px 12px;background:#0e0e16;border-radius:6px;font-size:0.85rem;color:#888}
+.methodology{margin-top:32px}
+.methodology h2{font-size:1.2rem;color:#ffd700;margin-bottom:16px}
+.rule-group{margin-bottom:20px}
+.rule-group h3{font-size:0.95rem;color:#aaa;margin-bottom:8px}
+.rule{display:flex;gap:8px;align-items:flex-start;padding:4px 0;font-size:0.85rem;color:#999}
+.rule::before{content:"→";color:#ffd700;flex-shrink:0}
+@media(max-width:600px){.form-row{grid-template-columns:1fr}.container{padding:20px 16px}}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>ink<span>.</span></h1>
+    <div class="tagline">视频 / PDF / 文章 → 结构化知识卡片 → Obsidian 知识库</div>
+  </header>
+
+  <div class="card">
+    <h2>📤 导入学习资料</h2>
+    <div class="drop-zone" id="dropZone">
+      <div class="drop-zone-icon">📂</div>
+      <div class="drop-zone-text">拖放文件到这里，或点击选择</div>
+      <div class="drop-zone-hint">支持 MP4/MKV + SRT/VTT 字幕、PDF、Markdown/TXT、文件夹</div>
+    </div>
+    <input type="file" id="fileInput" style="display:none" multiple>
+
+    <div id="subtitleArea" style="display:none;margin-top:12px">
+      <div class="drop-zone" id="subDropZone" style="padding:16px 24px">
+        <div class="drop-zone-text" style="font-size:0.85rem">📝 可选：追加字幕文件 (SRT/VTT)</div>
+      </div>
+      <input type="file" id="subInput" style="display:none" accept=".vtt,.srt">
+    </div>
+
+    <div style="margin-top:16px">
+      <div class="form-row">
+        <div class="form-group">
+          <label>API Key（可选，留空则使用模板）</label>
+          <input type="text" id="apiKey" placeholder="zhipu/other LLM API key">
+        </div>
+        <div class="form-group">
+          <label>Model</label>
+          <select id="model">
+            <option value="glm-4-flash">glm-4-flash（免费）</option>
+            <option value="gpt-4o-mini">GPT-4o-mini</option>
+            <option value="gpt-4o">GPT-4o</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="processBtn" disabled onclick="startProcess()">
+      ⚡ 开始处理
+    </button>
+  </div>
+
+  <div class="card" id="jobsCard" style="display:none">
+    <h2>📋 处理队列</h2>
+    <div id="jobList"></div>
+  </div>
+
+  <div class="card methodology">
+    <h2>📖 笔记方法论</h2>
+    <div class="rule-group">
+      <h3>记录阶段（看/读时）</h3>
+      <div class="rule">只记时间戳 + 关键词 + 个人疑问，不写完整句子</div>
+      <div class="rule">没听懂的地方标记 [!] ，跳过回头补</div>
+      <div class="rule">有联想的立刻记 → [概念名]</div>
+    </div>
+    <div class="rule-group">
+      <h3>整理阶段（24 小时内）</h3>
+      <div class="rule">一张卡片只讲一个概念</div>
+      <div class="rule">永远不复制粘贴，用自己的话写</div>
+      <div class="rule">引用原文 → 自己的理解 → 知识盲区 → 例子</div>
+      <div class="rule">至少关联一张已有卡片</div>
+    </div>
+    <div class="rule-group">
+      <h3>复习阶段（每周）</h3>
+      <div class="rule">随机抽 5 张卡片，尝试复述</div>
+      <div class="rule">说不清的标记 #needs-review，回看原视频</div>
+      <div class="rule">检查孤岛卡片（无人引用），要么删要么强制链接</div>
+    </div>
+  </div>
+</div>
+
+<script>
+let selectedFile = null;
+let selectedSub = null;
+
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const subDropZone = document.getElementById('subDropZone');
+const subInput = document.getElementById('subInput');
+const subtitleArea = document.getElementById('subtitleArea');
+
+dropZone.onclick = () => fileInput.click();
+dropZone.ondragover = e => { e.preventDefault(); dropZone.classList.add('drag-over') };
+dropZone.ondragleave = () => dropZone.classList.remove('drag-over');
+dropZone.ondrop = e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  const files = e.dataTransfer.files;
+  if (files.length) handleFileSelect(files[0]);
+};
+
+fileInput.onchange = () => { if (fileInput.files.length) handleFileSelect(fileInput.files[0]) };
+
+subDropZone.onclick = () => subInput.click();
+subDropZone.ondragover = e => { e.preventDefault(); subDropZone.classList.add('drag-over') };
+subDropZone.ondragleave = () => subDropZone.classList.remove('drag-over');
+subDropZone.ondrop = e => {
+  e.preventDefault();
+  subDropZone.classList.remove('drag-over');
+  const files = e.dataTransfer.files;
+  if (files.length) handleSubSelect(files[0]);
+};
+subInput.onchange = () => { if (subInput.files.length) handleSubSelect(subInput.files[0]) };
+
+function handleFileSelect(file) {
+  selectedFile = file;
+  dropZone.innerHTML = `
+    <div class="drop-zone-icon">✅</div>
+    <div class="drop-zone-text" style="color:#ffd700">${file.name}</div>
+    <div class="drop-zone-hint">${(file.size / 1024 / 1024).toFixed(1)} MB</div>
+  `;
+  document.getElementById('processBtn').disabled = false;
+  if (file.name.match(/\.(mp4|mkv|webm)$/i)) {
+    subtitleArea.style.display = 'block';
+  } else {
+    subtitleArea.style.display = 'none';
+    selectedSub = null;
+  }
+}
+
+function handleSubSelect(file) {
+  selectedSub = file;
+  subDropZone.innerHTML = `<div class="drop-zone-text" style="color:#ffd700">✅ ${file.name}</div>`;
+}
+
+function startProcess() {
+  if (!selectedFile) return;
+  const btn = document.getElementById('processBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ 处理中...';
+
+  const jobsCard = document.getElementById('jobsCard');
+  jobsCard.style.display = 'block';
+
+  const formData = new FormData();
+  formData.append('file', selectedFile);
+  if (selectedSub) formData.append('subtitle', selectedSub);
+
+  const apiKey = document.getElementById('apiKey').value;
+  const model = document.getElementById('model').value;
+  if (apiKey) formData.append('api_key', apiKey);
+  formData.append('model', model);
+
+  fetch('/api/process', { method: 'POST', body: formData })
+    .then(r => r.json())
+    .then(data => {
+      const jobId = data.job_id;
+      addJob(jobId, selectedFile.name);
+      pollJob(jobId);
+    })
+    .catch(err => {
+      btn.disabled = false;
+      btn.textContent = '⚡ 开始处理';
+      alert('Error: ' + err.message);
+    });
+}
+
+function addJob(jobId, title) {
+  const list = document.getElementById('jobList');
+  const div = document.createElement('div');
+  div.className = 'job-item';
+  div.id = `job-${jobId}`;
+  div.innerHTML = `
+    <div class="job-title">${title}</div>
+    <div class="job-status running" id="status-${jobId}">⏳ 排队中...</div>
+    <div class="progress-bar" id="progress-${jobId}"><div class="progress-bar-fill" style="width:10%"></div></div>
+  `;
+  list.prepend(div);
+}
+
+function pollJob(jobId) {
+  fetch(`/api/job/${jobId}`)
+    .then(r => r.json())
+    .then(data => {
+      const statusEl = document.getElementById(`status-${jobId}`);
+      const fillEl = document.querySelector(`#progress-${jobId} .progress-bar-fill`);
+      if (!statusEl) return;
+
+      if (data.status === 'running') {
+        statusEl.className = 'job-status running';
+        statusEl.textContent = '⏳ 处理中...';
+        fillEl.style.width = '60%';
+        setTimeout(() => pollJob(jobId), 2000);
+      } else if (data.status === 'done') {
+        statusEl.className = 'job-status done';
+        statusEl.textContent = '✅ 完成';
+        fillEl.style.width = '100%';
+        const results = data.results || [];
+        const resultDiv = document.createElement('div');
+        resultDiv.className = 'job-result';
+        resultDiv.innerHTML = results.map(r =>
+          `${r.status === 'done' ? '✅' : '⚠️'} ${r.title}: ${r.cards || '0'} 张卡片 → <code>${r.path || ''}</code>`
+        ).join('<br>');
+        document.getElementById(`job-${jobId}`).appendChild(resultDiv);
+        document.getElementById('processBtn').disabled = false;
+        document.getElementById('processBtn').textContent = '⚡ 开始处理';
+      } else if (data.status === 'error') {
+        statusEl.className = 'job-status error';
+        statusEl.textContent = '❌ ' + (data.error || 'Error');
+        fillEl.style.width = '100%';
+        fillEl.style.background = '#f87171';
+        document.getElementById('processBtn').disabled = false;
+        document.getElementById('processBtn').textContent = '⚡ 开始处理';
+      } else {
+        setTimeout(() => pollJob(jobId), 2000);
+      }
+    });
+}
+</script>
+</body>
+</html>

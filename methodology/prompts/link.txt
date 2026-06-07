@@ -1,0 +1,19 @@
+Given a list of existing note cards and a new card, find meaningful connections.
+
+Rules:
+- Only suggest links that are conceptually related (same topic, prerequisite, contrast, or application)
+- For each link, explain WHY they are related (1 sentence)
+- Prefer existing cards that the new card's author hasn't thought of
+- Output nothing if there are zero meaningful connections
+- max 3 links
+
+New card title: {title}
+New card content: {content}
+
+Existing cards:
+{existing_cards}
+
+Output format (YAML):
+links:
+  - title: "Existing card title"
+    reason: "为什么相关"
